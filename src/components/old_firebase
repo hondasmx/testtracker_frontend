@@ -1,0 +1,97 @@
+<template>
+  <div class="hello">
+    <div v-for="step in steps">
+      <article class="message" v-if="step.visible & !step.isEditing" style="width: 30%">
+        <div class="message-header">
+          <p>{{step.step}}</p>
+          <button class="delete" v-on:click="step.visible=false"></button>
+        </div>
+        <div class="message-body">
+          {{step.expected_result}}
+        </div>
+        <footer class="card-footer">
+          <a class="card-footer-item" @click="step.isEditing=true">Edit</a>
+        </footer>
+      </article>
+
+      <article class="message is-danger" v-if="step.visible & step.isEditing" style="width: 30%">
+        <div class="message-header">
+          <input type="text" placeholder="step" v-model=step.step>
+        </div>
+        <div class="message-body">
+          <input type="text" placeholder="expected result" v-model=step.expected_result>
+          <footer class="card-footer">
+            <!--<a class="card-footer-item" v-on:click="onAddButton">Save</a>-->
+            <a class="card-footer-item" @click="step.isEditing=false">Save</a>
+            <a class="card-footer-item" @click="onDeleteButton(step)">Delete</a>
+          </footer>
+        </div>
+      </article>
+    </div>
+
+    <br><br><br><br>
+
+    <article class="message is-danger" style="width: 30%">
+      <div class="message-header">
+        <input type="text" placeholder="step" v-model="add_step">
+      </div>
+      <div class="message-body">
+        <input type="text" placeholder="expected result" v-model="add_expected_result">
+        <footer class="card-footer">
+          <!--<a class="card-footer-item" v-on:click="onAddButton">Save</a>-->
+          <a class="card-footer-item" @click="onAddButton">Add</a>
+        </footer>
+      </div>
+    </article>
+  </div>
+</template>
+
+<script>
+  import Firebase from 'firebase'
+  import Toastr from 'toastr'
+  import axios from 'axios'
+
+  let config = {
+    apiKey: "AIzaSyDD2bHKGozzACwpCX-CSghSePrFpKuhzO8",
+    authDomain: "vuejs-test-1abc2.firebaseapp.com",
+    databaseURL: "https://vuejs-test-1abc2.firebaseio.com",
+    storageBucket: "vuejs-test-1abc2.appspot.com",
+    messagingSenderId: "470215031793"
+  };
+
+  let App = Firebase.initializeApp(config);
+  let db = App.database();
+  let stepsRef = db.ref('steps');
+  export default {
+    data(){
+      return {
+        add_expected_result: '',
+        add_step: ''
+      }
+    },
+    methods: {
+      onAddButton(){
+        stepsRef.push({
+          step: this.add_step,
+          expected_result: this.add_expected_result,
+          visible: true,
+          isEditing: false
+        });
+        this.add_step = '';
+        this.add_expected_result = '';
+      },
+      onDeleteButton(book){
+          stepsRef.child(book['.key']).remove()
+      }
+    },
+    firebase: {
+      steps: stepsRef
+    },
+    mounted() {
+      axios.get('http://localhost:5000/api/testcase/prj_test/8').then((response) => console.log(response.data))
+    }
+  }
+</script>
+<style scoped>
+
+</style>
