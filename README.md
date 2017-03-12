@@ -1,5 +1,3 @@
-# my-project3
-
 > A Vue.js project
 
 ## Build Setup
